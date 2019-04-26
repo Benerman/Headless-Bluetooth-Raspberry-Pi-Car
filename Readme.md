@@ -1,7 +1,15 @@
 Gathered sources creating a RPi headless bluetooth receiver that auto connects at boot to my specific phone's MAC address
 
+Thanks to
 https://gist.github.com/mill1000
-Sources: https://gist.github.com/mill1000/74c7473ee3b4a5b13f6325e9994ff84c
+and
+https://www.raspberrypi.org/forums/memberlist.php?mode=viewprofile&u=125239&sid=49e51edea1437fb918eb8ca317700ca8
+
+Sources: 
+https://gist.github.com/mill1000/74c7473ee3b4a5b13f6325e9994ff84c
+https://www.raspberrypi.org/forums/viewtopic.php?t=170353
+https://www.max2play.com/en/forums/topic/pi3-bluetooth-auto-reconnect-option-script/ - reconnect?
+https://retropie.org.uk/forum/topic/1754/help-with-script-to-maintain-bluetooth-connection/10 - Reconnect?
 
 ## About
 This gist will show how to setup Raspbian Stretch as a headless Bluetooth A2DP audio sink. This will allow your phone, laptop or other Bluetooth device to play audio wirelessly through a Rasperry Pi.

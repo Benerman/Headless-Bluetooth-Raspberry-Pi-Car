@@ -136,3 +136,58 @@ Reboot and enjoy!
 
 ## Low Volume Output
 If you are experiencing low volume output, run `alsamixer` and increase the volume of the Pi's soundcard.
+
+## Now to get your main device to automatically reconnect to your Headless Bluetooth Receiver
+OK! We need to enter over into the Python world. Jason Woodruff(https://raspberrypi.stackexchange.com/users/48183/jason-woodruff) wrote a Python program that will watch for the bluetooth device. In short, it will activate the connection between RPi and your bluetooth speaker, once your bluetooth speaker is turned on. And vice versa. Let's create a directory called python in your home directory To do that, type this:
+
+mkdir -p ~/python
+Now let's create the python program file. To do that, type this:
+
+nano ~/python/on.py
+Inside that file, we need to copy and paste the following:
+
+#!/usr/bin/python
+#
+# Monitor removal of bluetooth reciever
+import os
+import sys
+import subprocess
+import time
+
+def blue_it():
+    status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
+    while status == 0:
+        print("Bluetooth UP")
+        print(status)
+        time.sleep(15)
+        status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
+    else:
+        waiting()
+
+def waiting():
+    subprocess.call('killall -9 pulseaudio', shell=True)
+    time.sleep(3)
+    subprocess.call('pulseaudio --start', shell=True)
+    time.sleep(2)
+    status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)  
+    while status == 2:
+        print("Bluetooth DOWN")
+        print(status)
+        subprocess.call('~/scripts/autopair', shell=True)
+        time.sleep(15)
+        status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
+    else:
+        blue_it() 
+
+blue_it()
+Now press CTRL + x and then press Enter to save the Python program file. Now we need to make this file executable. To do that, type this:
+
+chmod +x ~/python/on.py
+
+
+go to:
+nano ~/.bashrc
+
+and place the code:
+wait
+~/python/on.py

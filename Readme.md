@@ -191,3 +191,92 @@ nano ~/.bashrc
 and place the code:
 wait
 ~/python/on.py
+
+
+Using the on.py file I modified it to my use case
+
+#!/usr/bin/python
+#
+# Monitor removal of bluetooth reciever
+import os
+import sys
+import subprocess
+import time
+btconn = False
+
+def blue_it():
+	global btconn 
+	status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
+	connnumloop = 0
+	while status == 0:
+		print("Bluetooth UP")
+		print(status)
+		time.sleep(29)
+		status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
+		time.sleep(1)
+		if status == 0:
+			btconn = True
+			subprocess.call('sudo /home/pi/scripts/DisableWifiOnBoot', shell=True)
+			print("Wifi disabled for next boot")
+		print("BT Device has connected since boot: {}".format(btconn))
+		connnumloop += 1
+	else:
+		waiting()
+
+def waiting():
+	global btconn 
+	status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)  
+	numloop = 0
+	while status == 2:
+		print("Bluetooth DOWN")
+		print(status)
+		subprocess.call('sudo /home/pi/scripts/autopair', shell=True)
+		time.sleep(1)
+		if btconn == False:
+			if numloop == 2:
+				subprocess.call('sudo /home/pi/scripts/EnableWifiOnBoot', shell=True)
+				time.sleep(1)
+				print("Wifi enabled for next boot")
+		time.sleep(13)
+		status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
+		numloop += 1
+		print("Loop count: {}  |  BT Device has connected since boot: {}".format(numloop,btconn))
+	else:
+		blue_it() 
+
+blue_it()
+
+Disable the onboard wlan0
+#!/bin/bash
+
+# DisableWifiOnBoot Script
+# Run on BT Device Connect
+# Check if line written
+grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
+	if [[ $(echo $?) == 1 ]];
+	then
+		echo "Line not in /boot/config.txt"
+		# Write Line
+		echo "dtoverlay=pi3-disable-wifi" | sudo tee -a /boot/config.txt
+		echo "Writing line to disable WIFI on boot"
+	else
+		echo "Line exists already, WIFI will be disabled on boot"
+	fi
+echo "Done"
+
+
+
+Enable onboard wlan0
+#!/bin/bash
+
+# EnableWifiOnBoot Script
+# Clear out line disabling WIFI on boot
+# Check if line written
+grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
+	if [[ $(echo $?) == 0 ]];
+	then
+		echo "Line is within /boot/config.txt"
+		# Write Line
+		sudo sed -e s/dtoverlay=pi3-disable-wifi//g -i /boot/config.txt
+	fi
+echo "Done"

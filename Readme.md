@@ -182,19 +182,21 @@ def waiting():
 blue_it()
 Now press CTRL + x and then press Enter to save the Python program file. Now we need to make this file executable. To do that, type this:
 
-chmod +x ~/python/on.py
+```chmod +x ~/python/on.py```
 
 
 go to:
+```
 nano ~/.bashrc
-
+```
 and place the code:
+```
 wait
 ~/python/on.py
-
+```
 
 Using the on.py file I modified it to my use case
-
+```
 #!/usr/bin/python
 #
 # Monitor removal of bluetooth reciever
@@ -245,8 +247,9 @@ def waiting():
 		blue_it() 
 
 blue_it()
-
+```
 Disable the onboard wlan0
+```
 #!/bin/bash
 
 # DisableWifiOnBoot Script
@@ -263,10 +266,11 @@ grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
 		echo "Line exists already, WIFI will be disabled on boot"
 	fi
 echo "Done"
-
+```
 
 
 Enable onboard wlan0
+```
 #!/bin/bash
 
 # EnableWifiOnBoot Script
@@ -280,3 +284,4 @@ grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
 		sudo sed -e s/dtoverlay=pi3-disable-wifi//g -i /boot/config.txt
 	fi
 echo "Done"
+```

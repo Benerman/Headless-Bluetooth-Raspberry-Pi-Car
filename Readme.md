@@ -14,6 +14,7 @@ https://retropie.org.uk/forum/topic/1754/help-with-script-to-maintain-bluetooth-
 https://raspberrypi.stackexchange.com/questions/53408/automatically-connect-trusted-bluetooth-speaker - Script to place your known BT devices to auto connect. Maybe add two+ mac addresses and then create logic to try for duration, then next...
 
 
+
 ## About
 This gist will show how to setup Raspbian Stretch as a headless Bluetooth A2DP audio sink. This will allow your phone, laptop or other Bluetooth device to play audio wirelessly through a Rasperry Pi.
 
@@ -28,6 +29,11 @@ A quick search will turn up a plethora of tutorials on setting up A2DP on the Ra
 * [Bluez-alsa](https://github.com/Arkq/bluez-alsa) - Available in the Raspbian package repo. This software allows us to stream A2DP audio over Bluetooth without PulseAudio.
 * Raspberry Pi with Bluetooth - The Raspberry Pi 3 has integrated Bluetooth, however there is a [known bug](https://github.com/raspberrypi/linux/issues/1402) when the WiFi is used simultaneously. Cheap USB Bluetooth dongles work equally well.
 
+My Personal Experience:
+* Avoid integrated Bluetooth - I used the RPi Zero W's onboard bluetooth and had issues with the the RPi0W initiate the connection on boot startup. With the integrated Bluetooth, The phone and RPi0W would never autoconnect on boot, but my RPi1 did. Everytime. Checked code, it was the same. I was using a USB Bluetooth dongle.  I had used an RPi 1 and had everthing working, but the audio was poor and I needed cleaner high end(Was distorted and gross sounding). I ended up getting RPi0W with HIFIBerry DAC Zero for size reasons. My RPi0W was working fine, but I could hear some RF noise occur every 4-6 seconds. If it was plugged into a USB phone car charger the noise was unbearable, which was due to grounding issue. I purchased a Ground Loop Isolator and it helped dramatically with all ground noise.
+
+I thought that the noise was caused by WIFI being enabled, So I modified the script that provides monitoring and running of autoconnect script to enable and disable wlan0(integrated Wifi) on reboot. If a bluetooth device connects, disable wifi on next boot. If no bluetooth device connects within 2 mins, delete line in /boot/config.txt that disables wifi on boot, which in turn enables wlan0 as well as brings me access to SSH.
+
 ## Disabling Integrated Bluetooth
 If you are using a separate USB Bluetooth dongle, disable the integrated Bluetooth to prevent conflicts.
 
@@ -39,6 +45,13 @@ dtoverlay=pi3-disable-bt
 to `/boot/config.txt` and execute the following command
 ```
 sudo systemctl disable hciuart.service
+```
+
+## Enable HIFIBerry DAC Zero
+```/boot/config.txt```
+
+```
+dtoverlay something something
 ```
 
 ## Initial Setup
@@ -72,6 +85,13 @@ power on
 discoverable on
 exit
 ```
+3. Change RPi Bluetooth name
+```
+sudo bluetoothctl
+system-alias YourBluetoothDeviceName
+exit
+```
+Change "YourBluetoothDeviceName" to What you want the device to be called/broadcast as.
 
 ## Install The A2DP Bluetooth Agent
 A Bluetooth agent is a piece of software that handles pairing and authorization of Bluetooth devices. The following agent allows the Raspberry Pi to automatically pair and accept A2DP connections from Bluetooth devices.
@@ -104,6 +124,18 @@ Rejecting non-A2DP Service
 
 If the Raspberry Pi is not recognized as a audio device, ensure that the bluealsa package was installed as part of the [Initial Setup](#initial-setup)
 
+## Issues with RPi recognized as A2DP
+I had an issue with the RPI pairing and then just disconnecting. It would no longer appear as if it were connected, but it would stay in the paired(saved) devices section in my phone Bluetooth connected devices.
+
+I had to to add to this doc ```/etc/something here```
+
+and add this line ```-ad2p sink```
+to look like this line:
+```
+bluealsa something something
+```
+
+
 ## Install The A2DP Bluetooth Agent As A Service
 To make the A2DP Bluetooth Agent run on boot copy the included file **bt-agent-a2dp.service** to `/etc/systemd/system`.
 Now run the following command to enable the A2DP Agent service
@@ -134,7 +166,11 @@ sudo systemctl enable a2dp-playback.service
 
 Reboot and enjoy!
 
-## Low Volume Output
+## HIFIBerry Light or Zero does not have audio controls available via software
+I have to run the volume on my phone at 66% in order to prevent distortion. It has to do with the max output of the HIFIBerry and it reaches an old standard for HIFI of 2Vdmfs or something, while the normal is only 1vdmfs. ----- Correct this
+
+
+## Low Volume Output for External or Internal 
 If you are experiencing low volume output, run `alsamixer` and increase the volume of the Pi's soundcard.
 
 ## Now to get your main device to automatically reconnect to your Headless Bluetooth Receiver
@@ -165,10 +201,6 @@ def blue_it():
         waiting()
 
 def waiting():
-    subprocess.call('killall -9 pulseaudio', shell=True)
-    time.sleep(3)
-    subprocess.call('pulseaudio --start', shell=True)
-    time.sleep(2)
     status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)  
     while status == 2:
         print("Bluetooth DOWN")

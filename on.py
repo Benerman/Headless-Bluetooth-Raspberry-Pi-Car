@@ -5,7 +5,7 @@ import os
 import sys
 import subprocess
 import time
-btconn = False
+btconn = False # used to monitor if Bluetooth connection is triggered
 
 def blue_it():
         global btconn
@@ -34,7 +34,12 @@ def waiting():
         while status == 2:
                 print("Bluetooth DOWN")
                 print(status)
-                subprocess.call('sudo /home/pi/scripts/autopair', shell=True)
+                if numloop % 2 == 0:
+                        print('Attempting to Pair to Phone 1')
+                        subprocess.call('sudo /home/pi/scripts/autopair', shell=True)
+                else:
+                        print('Attempting to Pair to Phone 2')
+                        subprocess.call('sudo /home/pi/scripts/autopair2', shell=True)
                 time.sleep(1)
                 if btconn == False:
                         if numloop == 2:

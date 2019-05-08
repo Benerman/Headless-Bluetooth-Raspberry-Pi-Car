@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# EnableWifiOnBoot Script
+# Clear out line disabling WIFI on boot
+# Check if line written
+grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
+        if [[ $(echo $?) == 0 ]]; then
+                echo "Line is within /boot/config.txt"
+                # Write Line
+                sudo sed -e s/dtoverlay=pi3-disable-wifi//g -i /boot/config.txt
+        fi
+echo "Done Enabling Wifi on Next Boot"
+
+#Re-enable DHCPCD on next boot in hopes of speeding up boot time
+sudo update-rc.d dhcpcd defaults

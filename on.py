@@ -9,8 +9,9 @@ btconn = False # used to monitor if Bluetooth connection is triggered
 
 def blue_it():
         global btconn
+        global connnumloop
         status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
-        global connnumloop = 0
+        connnumloop = 0
         while status == 0:
                 print("Bluetooth UP")
                 print(status)
@@ -29,8 +30,9 @@ def blue_it():
 
 def waiting():
         global btconn
+        global numloop
         status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
-        global numloop = 0
+        numloop = 0
         while status == 2:
                 print("Bluetooth DOWN")
                 print(status)
@@ -49,7 +51,7 @@ def waiting():
                 time.sleep(13)
                 status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
                 numloop += 1
-                print("Loop count: {}  |  BT Device has connected since boot: {}".format(numloop,btconn))
+                print("Loop count: {} | BT Device has connected since boot: {}".format(numloop,btconn))
         else:
                 blue_it()
 

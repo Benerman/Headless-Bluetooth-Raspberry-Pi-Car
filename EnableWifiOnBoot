@@ -7,7 +7,9 @@ grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
         if [[ $(echo $?) == 0 ]]; then
                 echo "Line is within /boot/config.txt"
                 # Write Line
-                sudo sed -e s/dtoverlay=pi3-disable-wifi//g -i /boot/config.txt
+                sudo sed -e s/dtoverlay=pi3-disable-wifi//g -i /boot/config.txt;echo $?
+        else
+                echo "Line is not in file, Wifi will be enabled on next boot"
         fi
 echo "Done Enabling Wifi on Next Boot"
 

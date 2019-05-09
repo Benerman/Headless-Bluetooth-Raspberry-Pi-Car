@@ -8,7 +8,7 @@ grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
         then
                 echo "Line not in /boot/config.txt"
                 # Write Line
-                echo "dtoverlay=pi3-disable-wifi" | sudo tee -a /boot/config.txt
+                sudo sed '/#_Disable_Onboard_WIFI/ a dtoverlay=pi3-disable-wifi' -i /boot/config.txt;echo $?
                 echo "Writing line to disable WIFI on boot"
         else
                 echo "Line exists already, WIFI will be disabled on boot"

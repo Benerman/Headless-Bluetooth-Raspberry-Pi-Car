@@ -125,19 +125,19 @@ Rejecting non-A2DP Service
 If the Raspberry Pi is not recognized as a audio device, ensure that the bluealsa package was installed as part of the [Initial Setup](#initial-setup)
 
 ## Issues with RPi recognized as A2DP
-I had an issue with the RPI pairing and then just disconnecting. It would no longer appear as if it were connected, but it would stay in the paired(saved) devices section in my phone Bluetooth connected devices.
+I had an issue with the RPI pairing and then just disconnecting. It would no longer appear as if it were connected, but it would stay in the paired(saved) devices section in my phone Bluetooth connected devices. Antannah(From mill1000 Guide's comments) managed to fix this by adding the a2dp-sink as protocol.
 
-I had to to add to this doc ```/etc/something here```
+I had to to add to ```/lib/systemd/system/bluealsa.service```
 
-and add this line ```-ad2p sink```
-to look like this line:
-```
-bluealsa something something
-```
+and add this line ```-p a2dp-sink```
 
+by changing the ExecStart line to 
+```ExecStart=/usr/bin/bluealsa -p a2dp-sink```. 
+
+Also, try changing the user stated there is `User=root` to `User=pi` or vice versa. (Might be referring to one of the files below that this helps with troubleshooting step?)
 
 ## Install The A2DP Bluetooth Agent As A Service
-To make the A2DP Bluetooth Agent run on boot copy the included file **bt-agent-a2dp.service** to `/etc/systemd/system`.
+To make the A2DP Bluetooth Agent run on boot copy the included file `bt-agent-a2dp.service` to `/etc/systemd/system`.
 Now run the following command to enable the A2DP Agent service
 ```
 sudo systemctl enable bt-agent-a2dp.service
@@ -173,15 +173,19 @@ I have to run the volume on my phone at 66% in order to prevent distortion. It h
 ## Low Volume Output for External or Internal 
 If you are experiencing low volume output, run `alsamixer` and increase the volume of the Pi's soundcard.
 
+
+## Raspberry Pi Zero W
+I needed Wifi to SSH in to modify any settings/files I wanted to create some logic to turn off Wifi and disable DHCPCD on boot up. Possibly eliminating interference with Bluetooth dongle and hopefully reducing boot time to get auto-connected faster. If a bluetooth device connects, It will run `DisableWifiOnBoot` disabling Wifi and DHCPCD on boot up. This perpetuates a fast boot up and will assume its existence as Headless Bluetooth Receiver mode. If there is no bluetooth connection within certain timeframe (adjustable by `numloop` threshold) `EnableWifiOnBoot` script will run and enable Wifi and DHCPCD service on boot. Now if you connect after the `numloop` threshold, you will then trigger `DisableWifiOnBoot`. If you need to configure the RPi Zero W then just turn off Bluetooth on your phone or device that it will auto-connect to boot it up. Watch the clock to ensure you have let the script re-enable the Wifi by running `EnableWifiOnBoot` and then unplug and re-plug the RPi and it will boot with the ability to SSH.
+
 ## Now to get your main device to automatically reconnect to your Headless Bluetooth Receiver
 OK! We need to enter over into the Python world. Jason Woodruff(https://raspberrypi.stackexchange.com/users/48183/jason-woodruff) wrote a Python program that will watch for the bluetooth device. In short, it will activate the connection between RPi and your bluetooth speaker, once your bluetooth speaker is turned on. And vice versa. Let's create a directory called python in your home directory To do that, type this:
 
-mkdir -p ~/python
+```mkdir -p ~/python```
+
 Now let's create the python program file. To do that, type this:
 
-nano ~/python/on.py
-Inside that file, we need to copy and paste the following:
-
+Using the on.py file I modified it to my use case
+```
 #!/usr/bin/python
 #
 # Monitor removal of bluetooth reciever
@@ -189,29 +193,59 @@ import os
 import sys
 import subprocess
 import time
+btconn = False # used to monitor if Bluetooth connection is triggered
 
 def blue_it():
-    status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
-    while status == 0:
-        print("Bluetooth UP")
-        print(status)
-        time.sleep(15)
+        global btconn
+        global connnumloop
         status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
-    else:
-        waiting()
+        connnumloop = 0
+        while status == 0:
+                print("Bluetooth UP")
+                print(status)
+                status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
+                time.sleep(1)
+                if status == 0:
+                        if connnumloop == 0:
+                                btconn = True
+                                subprocess.call('sudo /home/pi/scripts/DisableWifiOnBoot', shell=True)
+                                print("Wifi disabled for next boot")
+                print("BT Device has connected since boot: {}".format(btconn))
+                connnumloop += 1
+                time.sleep(29)
+        else:
+                waiting()
 
 def waiting():
-    status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)  
-    while status == 2:
-        print("Bluetooth DOWN")
-        print(status)
-        subprocess.call('~/scripts/autopair', shell=True)
-        time.sleep(15)
+        global btconn
+        global numloop
         status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
-    else:
-        blue_it() 
+        numloop = 0
+        while status == 2:
+                print("Bluetooth DOWN")
+                print(status)
+                if numloop % 2 == 0:
+                        print('Attempting to Pair to Phone 1')
+                        subprocess.call('sudo /home/pi/scripts/autopair', shell=True)
+                else:
+                        print('Attempting to Pair to Phone 2')
+                        subprocess.call('sudo /home/pi/scripts/autopair2', shell=True)
+                time.sleep(1)
+                if btconn == False:
+                        if numloop == 2:
+                                subprocess.call('sudo /home/pi/scripts/EnableWifiOnBoot', shell=True)
+                                time.sleep(1)
+                                print("Wifi enabled for next boot")
+                time.sleep(13)
+                status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
+                numloop += 1
+                print("Loop count: {} | BT Device has connected since boot: {}".format(numloop,btconn))
+        else:
+                blue_it()
 
 blue_it()
+```
+
 Now press CTRL + x and then press Enter to save the Python program file. Now we need to make this file executable. To do that, type this:
 
 ```chmod +x ~/python/on.py```
@@ -227,60 +261,11 @@ wait
 ~/python/on.py
 ```
 
-Using the on.py file I modified it to my use case
-```
-#!/usr/bin/python
-#
-# Monitor removal of bluetooth reciever
-import os
-import sys
-import subprocess
-import time
-btconn = False
+## Disable the onboard wlan0
+add this to file `DisableWifiOnBoot`
 
-def blue_it():
-	global btconn 
-	status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
-	connnumloop = 0
-	while status == 0:
-		print("Bluetooth UP")
-		print(status)
-		time.sleep(29)
-		status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
-		time.sleep(1)
-		if status == 0:
-			btconn = True
-			subprocess.call('sudo /home/pi/scripts/DisableWifiOnBoot', shell=True)
-			print("Wifi disabled for next boot")
-		print("BT Device has connected since boot: {}".format(btconn))
-		connnumloop += 1
-	else:
-		waiting()
+```~/scripts/```
 
-def waiting():
-	global btconn 
-	status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)  
-	numloop = 0
-	while status == 2:
-		print("Bluetooth DOWN")
-		print(status)
-		subprocess.call('sudo /home/pi/scripts/autopair', shell=True)
-		time.sleep(1)
-		if btconn == False:
-			if numloop == 2:
-				subprocess.call('sudo /home/pi/scripts/EnableWifiOnBoot', shell=True)
-				time.sleep(1)
-				print("Wifi enabled for next boot")
-		time.sleep(13)
-		status = subprocess.call('ls /dev/input/event0 2>/dev/null', shell=True)
-		numloop += 1
-		print("Loop count: {}  |  BT Device has connected since boot: {}".format(numloop,btconn))
-	else:
-		blue_it() 
-
-blue_it()
-```
-Disable the onboard wlan0
 ```
 #!/bin/bash
 
@@ -288,20 +273,26 @@ Disable the onboard wlan0
 # Run on BT Device Connect
 # Check if line written
 grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
-	if [[ $(echo $?) == 1 ]];
-	then
-		echo "Line not in /boot/config.txt"
-		# Write Line
-		echo "dtoverlay=pi3-disable-wifi" | sudo tee -a /boot/config.txt
-		echo "Writing line to disable WIFI on boot"
-	else
-		echo "Line exists already, WIFI will be disabled on boot"
-	fi
-echo "Done"
+        if [[ $(echo $?) == 1 ]];
+        then
+                echo "Line not in /boot/config.txt"
+                # Write Line
+                sudo sed '/#_Disable_Onboard_WIFI/ a dtoverlay=pi3-disable-wifi' -i /boot/config.txt;echo $?
+                echo "Writing line to disable WIFI on boot"
+        else
+                echo "Line exists already, WIFI will be disabled on boot"
+        fi
+echo "Done Disabling Wifi On Next Boot"
+
+#Disable DHCPCD on next boot in hopes of speeding up boot time
+sudo update-rc.d -f dhcpcd remove
+```
+make it executable
+```
+sudo chmod +x ~/scripts/DisableWifiOnBoot
 ```
 
-
-Enable onboard wlan0
+## Enable onboard wlan0
 ```
 #!/bin/bash
 
@@ -309,11 +300,20 @@ Enable onboard wlan0
 # Clear out line disabling WIFI on boot
 # Check if line written
 grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
-	if [[ $(echo $?) == 0 ]];
-	then
-		echo "Line is within /boot/config.txt"
-		# Write Line
-		sudo sed -e s/dtoverlay=pi3-disable-wifi//g -i /boot/config.txt
-	fi
-echo "Done"
+        if [[ $(echo $?) == 0 ]]; then
+                echo "Line is within /boot/config.txt"
+                # Write Line
+                sudo sed -e s/dtoverlay=pi3-disable-wifi//g -i /boot/config.txt;echo $?
+        else
+                echo "Line is not in file, Wifi will be enabled on next boot"
+        fi
+echo "Done Enabling Wifi on Next Boot"
+
+#Re-enable DHCPCD on next boot in hopes of speeding up boot time
+sudo update-rc.d dhcpcd defaults
+```
+
+make it executable
+```
+sudo chmod +x ~/scripts/EnableWifiOnBoot
 ```

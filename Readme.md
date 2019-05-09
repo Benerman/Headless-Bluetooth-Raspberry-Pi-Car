@@ -48,10 +48,20 @@ sudo systemctl disable hciuart.service
 ```
 
 ## Enable HIFIBerry DAC Zero
-```/boot/config.txt```
+If you have higher quality DAC then make sure it is configured correctly. If using 3.5mm jack on RPi(Non Zero/W) ensure that the audio is outputting to the jack and not HDMI out.
 
+I have a HIFIBerry DAC Zero
+follow steps: https://www.hifiberry.com/build/documentation/configuring-linux-3-18-x/
+
+Go and edit the file ```/boot/config.txt```
+
+remove or comment out the line
 ```
-dtoverlay something something
+dtparam=audio=on
+```
+and place the line configuring the HIFIBerry
+```
+dtoverlay=hifiberry-dac
 ```
 
 ## Initial Setup
@@ -287,6 +297,11 @@ echo "Done Disabling Wifi On Next Boot"
 #Disable DHCPCD on next boot in hopes of speeding up boot time
 sudo update-rc.d -f dhcpcd remove
 ```
+next we need to add a line to the ```/boot/config.txt``` at the end of the file. This is where we will place the enabling and disabling line with the two scripts.
+```
+#_Disable_Onboard_WIFI
+```
+
 make it executable
 ```
 sudo chmod +x ~/scripts/DisableWifiOnBoot

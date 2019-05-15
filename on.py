@@ -21,6 +21,8 @@ def blue_it():
                         if connnumloop == 0:
                                 btconn = True
                                 subprocess.call('sudo cp /boot/config.txt.wifioff.bak /boot/config.txt', shell=True)
+								subprocess.call('qdbus --system org.bluez /org/bluez/hci0/dev_A0_10_81_21_68_34/player11 org.bluez.MediaPlayer1.Play', shell=True) # type 'qdbus --system org.bluez' then hit tab to see what '/playerXX' number you have
+								print("Sent Play command to phone")
                                 print("Wifi disabled for next boot")
                 print("BT Device has connected since boot: {}".format(btconn))
                 connnumloop += 1

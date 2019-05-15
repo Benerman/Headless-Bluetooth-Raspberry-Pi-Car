@@ -20,7 +20,7 @@ def blue_it():
                 if status == 0:
                         if connnumloop == 0:
                                 btconn = True
-                                subprocess.call('sudo /home/pi/scripts/DisableWifiOnBoot', shell=True)
+                                subprocess.call('sudo cp /boot/config.txt.wifioff.bak /boot/config.txt', shell=True)
                                 print("Wifi disabled for next boot")
                 print("BT Device has connected since boot: {}".format(btconn))
                 connnumloop += 1
@@ -44,8 +44,8 @@ def waiting():
                         subprocess.call('sudo /home/pi/scripts/autopair2', shell=True)
                 time.sleep(1)
                 if btconn == False:
-                        if numloop == 2:
-                                subprocess.call('sudo /home/pi/scripts/EnableWifiOnBoot', shell=True)
+                        if numloop == 6:
+                                subprocess.call('sudo cp /boot/config.txt.bak /boot/config.txt', shell=True)
                                 time.sleep(1)
                                 print("Wifi enabled for next boot")
                 time.sleep(13)

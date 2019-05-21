@@ -1,15 +1,29 @@
 Gathered sources creating a RPi headless bluetooth receiver that auto connects at boot to my specific phone's MAC address
 
-Thanks to
-https://gist.github.com/mill1000
-and
-https://www.raspberrypi.org/forums/memberlist.php?mode=viewprofile&u=125239&sid=49e51edea1437fb918eb8ca317700ca8
-
 Sources: 
 https://gist.github.com/mill1000/74c7473ee3b4a5b13f6325e9994ff84c
 https://www.raspberrypi.org/forums/viewtopic.php?t=170353
+```
 https://www.max2play.com/en/forums/topic/pi3-bluetooth-auto-reconnect-option-script/ - reconnect?
+```
+
 https://retropie.org.uk/forum/topic/1754/help-with-script-to-maintain-bluetooth-connection/10 - Reconnect?
+```
+I found my solution. I made the following changes (in bold) to my /bin/connect-bluetooth.sh file.
+
+#!/bin/bash
+while (sleep 30)
+do
+sudo bluetoothctl << EOF
+power on
+connect [MAC Address]
+exit
+EOF
+done
+
+You can change the sleep value to whatever you'd prefer. 30 seconds seemed to work out fine for me. If i start to get impatient, I'll change it down to 15.
+```
+
 
 https://raspberrypi.stackexchange.com/questions/53408/automatically-connect-trusted-bluetooth-speaker - Script to place your known BT devices to auto connect. Maybe add two+ mac addresses and then create logic to try for duration, then next...
 
@@ -194,6 +208,18 @@ OK! We need to enter over into the Python world. Jason Woodruff(https://raspberr
 
 Now let's create the python program file. To do that, type this:
 
+I created two bash files that have mine and my wife's MAC address with a script to initiate a connect with ```bluetoothctl```. I drive the car the most so I am first and then it will try the Wife's phone. Works well!
+
+If you do not need this or want to disable autoconnect, just remove these lines from on.py
+```
+                if numloop % 2 == 0:
+                        print('Attempting to Pair to Phone 1')
+                        subprocess.call('sudo /home/pi/scripts/autopair', shell=True)
+                else:
+                        print('Attempting to Pair to Phone 2')
+                        subprocess.call('sudo /home/pi/scripts/autopair2', shell=True)
+```
+
 Using the on.py file I modified it to my use case
 ```
 #!/usr/bin/python
@@ -272,6 +298,7 @@ wait
 ```
 
 ## Disable the onboard wlan0
+I tried this option of using ```sed``` but it ended up clearing out /boot/config.txt file completely rendering the unit useless. I therefore went the route of just copying a properly configured config.txt.bak file to replace existing one. It works flawlessly.
 add this to file `DisableWifiOnBoot`
 
 ```~/scripts/```
@@ -332,3 +359,6 @@ make it executable
 ```
 sudo chmod +x ~/scripts/EnableWifiOnBoot
 ```
+
+## Trigger RPi to Autoplay last playing track on phone
+Inspired by other Car's bluetooth systems that resume playing where you left off, I was on a mission to get this implemented. Turns out it was easy enough as the A2DP-Agent sets up the Bluetooth AVRCP(Audio/Video Remote Control Protocol) profile needed to transmit those messages. Its a matter of setting up the command and adding it into the Python script.

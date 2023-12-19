@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # EnableWifiOnBoot Script
-# Clear out line disabling WIFI on boot
-# Check if line written
+#Clear out line disabling WIFI on boot Check if line written
 grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
         if [[ $(echo $?) == 0 ]]; then
                 echo "Line is within /boot/config.txt"

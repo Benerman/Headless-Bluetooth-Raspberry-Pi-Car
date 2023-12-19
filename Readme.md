@@ -118,6 +118,7 @@ exit
 Change "YourBluetoothDeviceName" to What you want the device to be called/broadcast as.
 
 ## Install The A2DP Bluetooth Agent
+https://gist.github.com/mill1000/74c7473ee3b4a5b13f6325e9994ff84chttps://gist.github.com/mill1000/74c7473ee3b4a5b13f6325e9994ff84c
 A Bluetooth agent is a piece of software that handles pairing and authorization of Bluetooth devices. The following agent allows the Raspberry Pi to automatically pair and accept A2DP connections from Bluetooth devices.
 All other Bluetooth services are rejected.
 
@@ -200,6 +201,10 @@ If you are experiencing low volume output, run `alsamixer` and increase the volu
 
 ## Raspberry Pi Zero W
 I needed Wifi to SSH in to modify any settings/files I wanted to create some logic to turn off Wifi and disable DHCPCD on boot up. Possibly eliminating interference with Bluetooth dongle and hopefully reducing boot time to get auto-connected faster. If a bluetooth device connects, It will run `DisableWifiOnBoot` disabling Wifi and DHCPCD on boot up. This perpetuates a fast boot up and will assume its existence as Headless Bluetooth Receiver mode. If there is no bluetooth connection within certain timeframe (adjustable by `numloop` threshold) `EnableWifiOnBoot` script will run and enable Wifi and DHCPCD service on boot. Now if you connect after the `numloop` threshold, you will then trigger `DisableWifiOnBoot`. If you need to configure the RPi Zero W then just turn off Bluetooth on your phone or device that it will auto-connect to boot it up. Watch the clock to ensure you have let the script re-enable the Wifi by running `EnableWifiOnBoot` and then unplug and re-plug the RPi and it will boot with the ability to SSH.
+
+## Find which eventX your new input is
+Use this command to find out which eventX number your Bluetooth will connect under and make sure it matches the the code below. Or disable the HDMI or which ever device is `event0`
+```cat /proc/bus/input/devices  | grep -P '^[NH]: ' | paste - -```
 
 ## Now to get your main device to automatically reconnect to your Headless Bluetooth Receiver
 OK! We need to enter over into the Python world. Jason Woodruff(https://raspberrypi.stackexchange.com/users/48183/jason-woodruff) wrote a Python program that will watch for the bluetooth device. In short, it will activate the connection between RPi and your bluetooth speaker, once your bluetooth speaker is turned on. And vice versa. Let's create a directory called python in your home directory To do that, type this:
@@ -362,3 +367,6 @@ sudo chmod +x ~/scripts/EnableWifiOnBoot
 
 ## Trigger RPi to Autoplay last playing track on phone
 Inspired by other Car's bluetooth systems that resume playing where you left off, I was on a mission to get this implemented. Turns out it was easy enough as the A2DP-Agent sets up the Bluetooth AVRCP(Audio/Video Remote Control Protocol) profile needed to transmit those messages. Its a matter of setting up the command and adding it into the Python script.
+
+installing the `qdbus` on the rpi, you can communicate commands with the Mac address formatted below
+```qdbus --system org.bluez /org/bluez/hci0/dev_00_00_00_00_00_00/player0 org.bluez.MediaPlayer1.Play```

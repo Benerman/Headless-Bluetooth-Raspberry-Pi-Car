@@ -1,4 +1,0 @@
-#!/bin/bash
-bluetoothctl << EOF
-connect 00:00:00:00:00:00 #Your Mac Address Here
-EOF

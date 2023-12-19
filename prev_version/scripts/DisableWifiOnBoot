@@ -1,8 +1,5 @@
 #!/bin/bash
-
-# DisableWifiOnBoot Script
-# Run on BT Device Connect
-# Check if line written
+# DisableWifiOnBoot Script Run on BT Device Connect Check if line written
 grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
         if [[ $(echo $?) == 1 ]];
         then
@@ -14,6 +11,7 @@ grep -q "dtoverlay=pi3-disable-wifi" /boot/config.txt
                 echo "Line exists already, WIFI will be disabled on boot"
         fi
 echo "Done Disabling Wifi On Next Boot"
+
 
 #Disable DHCPCD on next boot in hopes of speeding up boot time
 sudo update-rc.d -f dhcpcd remove

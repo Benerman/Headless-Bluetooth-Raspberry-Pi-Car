@@ -1,0 +1,10 @@
+{
+    "actions": {
+        "connect": "",
+        "remove": "",
+        "priority": ""
+    },
+    "previous_addresses": {
+        "1": {"name":"Ben's S23 Ultra", "mac_addr": "9C:73:B1:13:2F:98", "connection_count": 0}
+    }
+}

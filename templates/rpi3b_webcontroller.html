@@ -1,0 +1,182 @@
+<!DOCTYPE HTML>
+	<html>
+		<head>
+			<title> GenesisPiZ </title>
+
+			<meta http-equiv='content-type' content='text/html; charset=UTF-8'>
+			<meta name='apple-mobile-web-app-capable' content='yes' />
+			<meta name='apple-mobile-web-app-status-bar-style' content='black-translucent' />
+			<meta http-equiv='refresh' content='10'>
+
+			<link rel="stylesheet" href='../static/rpi_style.css'/>
+			<script src="../static/jquery-3.7.1.min.js"></script>
+		</head>
+		
+		<body bgcolor = '#70706F'> 
+			<hr/><hr>
+			<h1 style='color : #3AAA35;'><center> AranaCorp - {{title}} </center></h1>
+			<hr/><hr>
+			<br><br>
+			<h2><center><p>Date and time :  {{time}}</p></center></h2>
+			<br><br><h2> Digital Inputs/Ouputs </h2>
+			<div id='btnContainer'>
+				  <center>
+				  Pin GPIO2
+				  <input value={{data[0]}} readonly></input>
+				  <button id='dig2on'>Turn On </button></a>
+				  <button id='dig2off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO3
+				  <input value={{data[1]}} readonly></input>
+				  <button id='dig3on'>Turn On </button></a>
+				  <button id='dig3off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO4
+				  <input value={{data[2]}} readonly></input>
+				  <button id='dig4on'>Turn On </button></a>
+				  <button id='dig4off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO5
+				  <input value={{data[3]}} readonly></input>
+				  <button id='dig5on'>Turn On </button></a>
+				  <button id='dig5off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO6
+				  <input value={{data[4]}} readonly></input>
+				  <button id='dig6on'>Turn On </button></a>
+				  <button id='dig6off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO7
+				  <input value={{data[5]}} readonly></input>
+				  <button id='dig7on'>Turn On </button></a>
+				  <button id='dig7off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO8
+				  <input value={{data[6]}} readonly></input>
+				  <button id='dig8on'>Turn On </button></a>
+				  <button id='dig8off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO9
+				  <input value={{data[7]}} readonly></input>
+				  <button id='dig9on'>Turn On </button></a>
+				  <button id='dig9off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO10
+				  <input value={{data[8]}} readonly></input>
+				  <button id='dig10on'>Turn On </button></a>
+				  <button id='dig10off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO11
+				  <input value={{data[9]}} readonly></input>
+				  <button id='dig11on'>Turn On </button></a>
+				  <button id='dig11off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO12
+				  <input value={{data[10]}} readonly></input>
+				  <button id='dig12on'>Turn On </button></a>
+				  <button id='dig12off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO13
+				  <input value={{data[11]}} readonly></input>
+				  <button id='dig13on'>Turn On </button></a>
+				  <button id='dig13off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO14
+				  <input value={{data[12]}} readonly></input>
+				  <button id='dig14on'>Turn On </button></a>
+				  <button id='dig14off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO15
+				  <input value={{data[13]}} readonly></input>
+				  <button id='dig15on'>Turn On </button></a>
+				  <button id='dig15off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO16
+				  <input value={{data[14]}} readonly></input>
+				  <button id='dig16on'>Turn On </button></a>
+				  <button id='dig16off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO17
+				  <input value={{data[15]}} readonly></input>
+				  <button id='dig17on'>Turn On </button></a>
+				  <button id='dig17off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO18
+				  <input value={{data[16]}} readonly></input>
+				  <button id='dig18on'>Turn On </button></a>
+				  <button id='dig18off'>Turn Off </button></a><br /> 
+				  </center><center>
+				  Pin GPIO19
+				  <input value={{data[17]}} readonly></input>
+				  <button id='dig19on'>Turn On </button></a>
+				  <button id='dig19off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO20
+				  <input value={{data[18]}} readonly></input>
+				  <button id='dig20on'>Turn On </button></a>
+				  <button id='dig20off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO21
+				  <input value={{data[19]}} readonly></input>
+				  <button id='dig21on'>Turn On </button></a>
+				  <button id='dig21off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO22
+				  <input value={{data[20]}} readonly></input>
+				  <button id='dig22on'>Turn On </button></a>
+				  <button id='dig22off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO23
+				  <input value={{data[21]}} readonly></input>
+				  <button id='dig23on'>Turn On </button></a>
+				  <button id='dig23off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO24
+				  <input value={{data[22]}} readonly></input>
+				  <button id='dig24on'>Turn On </button></a>
+				  <button id='dig24off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO25
+				  <input value={{data[23]}} readonly></input>
+				  <button id='dig25on'>Turn On </button></a>
+				  <button id='dig25off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO26
+				  <input value={{data[24]}} readonly></input>
+				  <button id='dig26on'>Turn On </button></a>
+				  <button id='dig26off'>Turn Off </button></a><br /> 
+				  </center>
+				  <center>
+				  Pin GPIO27
+				  <input value={{data[25]}} readonly></input>
+				  <button id='dig27on'>Turn On </button></a>
+				  <button id='dig27off'>Turn Off </button></a><br /> 
+				  </center>
+			 </div>
+
+			 <script>
+				// Event Listener
+				var buttonClick = document.getElementById('btnContainer').addEventListener('click', function(event) {
+				  if (event.target.nodeName == "BUTTON") {
+					var tar = event.target.id;
+					console.log(tar);
+					$.getJSON('/'+tar,
+						function(data) {
+					  //do nothing
+					});
+
+					return false;
+				  }
+				});
+			</script>
+	</body>
+</html>

@@ -1,0 +1,39 @@
+body{
+    background-color:#70706F;
+    }
+    
+    h1{
+        color:#3AAA35;
+    }
+    
+    h3{
+        #width:100%;
+        border: 3px solid #3AAA35;
+        border-radius: 6px;
+        overflow: hidden; 
+        text-align:center;
+        padding:20px;
+    }
+    
+    
+    button{
+      width:auto;
+      height:60px;
+      background-color: #3aaa35;/* Green */
+      border: none;
+      color: white;
+      /*padding: 15px 32px;*/
+      text-align: center;
+      vertical-align:middle;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 20px;
+      border-radius: 12px;
+      -webkit-transition-duration: 0.4s; /* Safari */
+      transition-duration: 0.4s;
+      margin: 5px;
+    }
+    button:hover{
+      background-color: #4CAF50; /* Green */
+      color: white;
+    }

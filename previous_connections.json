@@ -5,6 +5,8 @@
         "priority": ""
     },
     "previous_addresses": {
-        "1": {"name":"Ben's S23 Ultra", "mac_addr": "9C:73:B1:13:2F:98", "connection_count": 0}
+        "1": {"name":"Ben's S23 Ultra", "mac_addr": "9C:73:B1:13:2F:98", "connection_count": 0, "default": true},
+        "2": {"name":"Shannon's Phone", "mac_addr": "9C:73:B1:13:2F:01", "connection_count": 0, "default": false},
+        "3": {"name":"CHILLY Fridgiaire", "mac_addr": "9C:73:B1:13:2F:99", "connection_count": 0, "default": false}
     }
 }

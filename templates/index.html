@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="../static/"></script>
+</head>
+<body>
+    <header>
+        <div>
+            
+        </div>
+    </header>
+    <section>
+        <div>
+            <div id="myDIV" class="header">
+                <h2>My To Do List</h2>
+                <input type="text" id="myInput" placeholder="Title...">
+                <span onclick="newElement()" class="addBtn">Add</span>
+              </div>
+              <div>{{ addresses }}</div>
+              <ul id="myUL">
+                {% for i,address in addresses.items() %}
+                    {% if address.default %}
+                        <li class="checked">
+                    {% else %}
+                        <li>
+                    {% endif %}
+                        {{ address.name }} {{ address.mac_addr }}
+                    </li>
+                {% endfor %}
+              </ul>
+        </div>
+    </section>
+</body>
+</html>

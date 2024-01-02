@@ -1,38 +1,287 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
     <link rel="stylesheet" href="../static/index.css">
-    <script src="../static/"></script>
+    <script src="../static/jquery-3.7.1.min.js"></script>
+    <script src="../static/axios.min.js"></script>
 </head>
+
 <body>
     <header>
         <div>
-            
+
         </div>
     </header>
     <section>
         <div>
-            <div id="myDIV" class="header">
-                <h2>My To Do List</h2>
-                <input type="text" id="myInput" placeholder="Title...">
-                <span onclick="newElement()" class="addBtn">Add</span>
-              </div>
-              <div>{{ addresses }}</div>
-              <ul id="myUL">
-                {% for i,address in addresses.items() %}
-                    {% if address.default %}
-                        <li class="checked">
-                    {% else %}
-                        <li>
-                    {% endif %}
-                        {{ address.name }} {{ address.mac_addr }}
-                    </li>
+            <div class="header">
+                <h2>GenesisPiZ Connection Configuration</h2>
+                <div>
+                    <input type="text" id="nameInput" name="name" placeholder="Name...">
+                    <input type="text" id="macAddrInput" name="mac_addr" placeholder="MAC Address...">
+                    <button class="button" onclick="newElement()">Add</button>
+                </div>
+            </div>
+            <ul id="list-of-addresses">
+                {% for address in addresses %}
+                {% if address.default %}
+                <li class="checked">
+                {% else %}
+                <li>
+                {% endif %}
+                    <input type="checkbox" name="default" value="{{ address.default }}" onclick="setDefault(this)" {% if address.default %}"checked" {% endif %}> 
+                    <input type="hidden" name="address_id" value="{{ loop.index }}">
+                    <div class="input-field">
+                        <label onclick="editElement(this)" for="btName{{ loop.index }}">{{ address.name }}</label>
+                        <input id="btName{{ loop.index }}" type="text" name="name" value="{{ address.name }}"
+                            style="display: none;">
+                    </div>
+                    <div class="input-field">
+                        <label onclick="editElement(this)" for="btMacAddr{{ loop.index }}">{{ address.mac_addr }}</label>
+                        <input id="btMacAddr{{ loop.index }}" type="text" onclick="editElement(this)" name="mac_addr"
+                            value="{{ address.mac_addr }}" style="display: none;">
+                    </div>
+                    <div>
+                        <!-- <button type="submit">Update</button> -->
+                        <button class="button delete" onclick="deleteElement(this)">Delete</button>
+                    </div>
+                </li>
                 {% endfor %}
-              </ul>
+            </ul>
         </div>
     </section>
 </body>
+<script>
+    // Create a "close" button and append it to each list item
+    var myNodelist = document.getElementsByTagName("LI");
+    var i;
+    for (i = 0; i < myNodelist.length; i++) {
+        var span = document.createElement("SPAN");
+        var txt = document.createTextNode("\u00D7");
+        span.className = "close";
+        span.appendChild(txt);
+        myNodelist[i].appendChild(span);
+    }
+
+    // Click on a close button to hide the current list item
+    var close = document.getElementsByClassName("close");
+    var i;
+    for (i = 0; i < close.length; i++) {
+        close[i].onclick = function () {
+            var div = this.parentElement;
+            div.attribute.onclick = deleteElement(this);
+            div.style.display = "none";
+        }
+    }
+
+    // Add a "checked" symbol when clicking on a list item
+    var list = document.querySelector('li input[type="checkbox"]');
+    list.addEventListener('click', function (ev) {
+        if (ev.target.tagName === 'LI') {
+            ev.target.classList.toggle('checked');
+        }
+    }, false);
+
+    function isValidMacAddress(macAddrInput) {
+        var macAddrRegex = /^[0-9A-Fa-f]{1,2}([\.:-])(?:[0-9A-Fa-f]{1,2}\1){4}[0-9A-Fa-f]{1,2}$/;
+        if (macAddrRegex.test(macAddrInput)) {
+            return true;
+        } else {
+            alert("Please enter a valid MAC address.\nUse the format xx:xx:xx:xx:xx:xx");
+            return false;
+        }
+    }
+
+    // Create a new list item when clicking on the "Add" button
+    function newElement() {
+
+        var inputValue = document.getElementById("nameInput").value;
+        var macAddrInput = document.getElementById("macAddrInput").value;
+        
+        if (inputValue === '' || macAddrInput === '') {
+            alert("Both fields must be populated!");
+        } else {
+            // document.getElementById("nameInput").value = "";
+            // document.getElementById("macAddrInput").value = "";
+
+            var isValidMacAddr = isValidMacAddress(macAddrInput);
+            if (!isValidMacAddr) {
+                return;
+            }
+            var data = {
+                address_id: null,
+                name: inputValue,
+                mac_addr: macAddrInput,
+                default: false
+            };
+            $.ajax({
+                type: "POST",
+                url: "/add",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data),
+                success: function (response) {
+                    console.log(response);
+                    },
+                error: function (error) {
+                    console.log(data);
+                    console.log(error);
+                    }
+            });
+            location.reload(true);
+        }
+
+    }
+
+    // // Rename a list item when clicking on the "Rename" button
+    // function renameElement(element) {
+    //     var span = element.previousElementSibling;
+    //     var inputValue = prompt("Enter the new name:");
+    //     if (inputValue !== null && inputValue !== '') {
+    //         span.textContent = inputValue;
+
+    //     } else {
+    //         alert("Please select an item to rename.");
+    //     }
+    // }
+
+    // Edit a list item when clicking on it
+    function editElement(element) {
+        var span = element;
+        var input = element.nextElementSibling;
+        var addressIdInput = span.closest('li').querySelector('input[name="address_id"]');
+        var addressId = Number(addressIdInput.value);
+        var originalValue = span.textContent;
+        input.value = originalValue;
+        span.style.display = "none";
+        input.style.display = "inline-block";
+        input.focus();
+
+        var checkIcon = document.createElement("i");
+        checkIcon.innerHTML = "&#10003;"; // Unicode for checkmark symbol
+        checkIcon.onclick = function () {
+            var newValue = input.value;
+            if (newValue !== '') {
+                defaultDevice = false;
+                var nameInput = null;
+                var macAddrInput = null;
+                span.textContent = newValue;
+                span.style.display = "inline-block";
+                input.style.display = "none";
+                if (input.name === "name") {
+                    var update_action = "/update_name";
+                    nameInput = newValue;
+                } else if (input.name === "mac_addr") {
+                    var update_action = "/update_mac_addr";
+                    var macAddrInput = newValue;
+                    var isValidMacAddr = isValidMacAddress(macAddrInput);
+                    if (!isValidMacAddr) {
+                        return;
+                    }
+                } else if (input.name === "default") {
+                    var update_action = "/update_default";
+                    defaultDevice = true;
+                    alert("default has ran")
+                } else {
+                    alert("Something went wrong.");
+                }
+                var data = {
+                    address_id: addressId,
+                    name: nameInput,
+                    mac_addr: macAddrInput,
+                    default: defaultDevice
+                };
+                $.ajax({
+                    type: "POST",
+                    url: update_action,
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        console.log(response);
+                        },
+                    error: function (error) {
+                        console.log(error);
+                        }
+                });
+                location.reload(true);
+            } else {
+                alert("Please enter a value.");
+            }
+        };
+        element.parentElement.appendChild(checkIcon);
+
+        var cancelIcon = document.createElement("i");
+        cancelIcon.innerHTML = "&#10005;"; // Unicode for times symbol
+        cancelIcon.onclick = function () {
+            span.style.display = "inline-block";
+            input.style.display = "none";
+            input.value = originalValue;
+            element.parentElement.removeChild(checkIcon);
+            element.parentElement.removeChild(cancelIcon);
+        };
+        element.parentElement.appendChild(cancelIcon);
+    }
+
+    // TODO add a "default" button to set the default device
+    // only one default should exist for all 'li' elements
+    // apply the checked class to the default 
+    function setDefault(element) {
+        var li = element.closest('li');
+        var addressIdInput = li.querySelector('input[name="address_id"]');
+        var addressId = Number(addressIdInput.value);
+        var data = {
+            address_id: addressId,
+            default: true
+        };
+        $.ajax({
+            type: "POST",
+            url: "/update_default",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data),
+            success: function (response) {
+                console.log(response);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+        // Clear all other 'checked' li items
+        var checkedItems = document.querySelectorAll('li.checked');
+        checkedItems.forEach(function (item) {
+            item.classList.remove('checked');
+        });
+
+        li.classList.add('checked');
+        location.reload(true);
+    }
+
+    // Delete a list item when clicking on the "Delete" button
+    function deleteElement(element) {
+        var li = element.closest('li');
+        var addressIdInput = li.querySelector('input[name="address_id"]');
+        var addressId = Number(addressIdInput.value);
+        var data = {
+            address_id: addressId
+        };
+        $.ajax({
+            type: "POST",
+            url: "/delete",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(data),
+            success: function (response) {
+                console.log(response);
+                },
+            error: function (error) {
+                console.log(error);
+                }
+        });
+        li.remove();
+    }
+
+</script>
+
 </html>

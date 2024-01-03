@@ -48,12 +48,11 @@ class BluetoothAction:
         self.save_json()
         self.debug_info(f"Updated mac_addr to {self.message['mac_addr']}")
 
-    def update_default(self):
-        [e.update({'default': False}) for e in self.prev_connected]
-        self.prev_connected[self.message['index']]['default'] = self.message['default']
+    def update_auto_play(self):
+        self.prev_connected[self.message['index']]['auto_play'] = self.message['auto_play']
         self.update_previous_addresses()
         self.save_json()
-        self.debug_info(f"Updated default to {self.message['default']}")
+        self.debug_info(f"Updated auto_play to {self.message['auto_play']}")
 
     def update_order(self):
         self.prev_connected.insert(self.message['index'], self.prev_connected.pop(self.message['index']))
@@ -68,8 +67,8 @@ class BluetoothAction:
             self.update_mac_addr()
         elif self.action_type == 'update_order':
             self.update_order()
-        elif self.action_type == 'update_default':
-            self.update_default()
+        elif self.action_type == 'update_auto_play':
+            self.update_auto_play()
         else:
             print(f"Invalid action_type: {self.action_type}")
 
@@ -78,7 +77,7 @@ class BluetoothAction:
             'name': self.message['name'],
             'mac_addr': self.message['mac_addr'],
             'connecton_count': 0,
-            'default': False
+            'auto_play': False
             }
         self.prev_connected.append(new_entry)
         self.update_previous_addresses()

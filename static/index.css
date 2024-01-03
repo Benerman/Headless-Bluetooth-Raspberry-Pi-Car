@@ -3,6 +3,10 @@
   box-sizing: border-box;
 }
 
+h1 {
+  font-size: 48px;
+  font-family: Arial, Helvetica, sans-serif;
+}
 /* Remove margins and padding from the list */
 ul {
   margin: 0;
@@ -12,15 +16,14 @@ ul {
 
 /* Style the list items */
 ul li {
-  /* position: relative; */
   padding: 12px 50px;
   background: #E8DDB5;
-  font-size: 22px;
+  font-size: 18px;
   transition: 0.2s;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
   align-items: center;
- 
+  gap: 10px;
   /* make the list items unselectable */
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -46,9 +49,39 @@ ul li.checked {
 }
   
 /* Add a "checked" mark when clicked on */
-ul li.checked::before {
+/* ul li.checked::before {
   content: '';
   position: absolute;
+  border-color: #fff;
+  border-style: solid;
+  border-width: 0 2px 2px 0; */
+  /* top: 10px; */
+  /* left: 0px; */
+  /* transform: rotate(45deg);
+  height: 15px;
+  width: 7px;
+  margin: 10px;
+} */
+
+ul li input[type="checkbox"] {
+  position: absolute;
+  visibility: visible;
+}
+
+
+li div.checked:hover {
+  border-color: #505168;
+}
+
+/* hide the input named 'default box for .checked li */
+ul li.checked input[type="checkbox"]:checked {
+  visibility: hidden;
+  /* content: ''; */
+  /* position: absolute; */
+}
+li div.checked {
+  position: relative;
+  cursor: pointer;
   border-color: #fff;
   border-style: solid;
   border-width: 0 2px 2px 0;
@@ -58,15 +91,6 @@ ul li.checked::before {
   height: 15px;
   width: 7px;
   margin: 10px;
-}
-
-ul li.checked:hover::before {
-  border-color: #505168;
-}
-
-/* hide the input named 'default box for .checked li */
-ul li.checked input[type="checkbox"] {
-  visibility: hidden;
 }
 
 /* Style the close button */
@@ -118,7 +142,7 @@ input[type="text"] {
   float: center;
   width: auto;
   padding: 10px;
-  margin: 20px 0;
+  margin: 10px 0;
   box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -145,4 +169,50 @@ input[type="text"] {
 
 .delete:hover {
   background-color: #ac202a;
+}
+
+.reorder {
+  position: absolute;
+  float: right;
+  /* right: 50px; */
+  margin: 10px;
+  margin-left: 25px;
+  padding: 10px;
+}
+
+.reorder-mode {
+  background-color: #505168;
+  color: white;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* .reorder-icon {
+  color:#2a2b38
+} */
+
+/* media queries */
+@media screen and (max-width: 600px) {
+  h1 {
+    font-size: 24px;
+  }
+  ul li {
+    font-size: 12px;
+    padding: 5px 10px;
+    /* grid-template-columns: repeat(1, 1fr);
+    padding: 12px 20px; */
+  }
+  /* .header {
+    padding: 20px 0;
+  } */
+  .container {
+    max-width: 100%;
+  }
+  .button{
+    padding: 8px 8px;
+    font-size: 12px;
+  }
 }

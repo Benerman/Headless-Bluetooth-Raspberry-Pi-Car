@@ -19,21 +19,30 @@
     <section>
         <div>
             <div class="header">
-                <h2>GenesisPiZ Connection Configuration</h2>
+                <h1>GenesisPiZ Connection Configuration</h1>
                 <div>
                     <input type="text" id="nameInput" name="name" placeholder="Name...">
                     <input type="text" id="macAddrInput" name="mac_addr" placeholder="MAC Address...">
                     <button class="button" onclick="newElement()">Add</button>
+                    <button class="reorder button" onclick="reorderElements()"> &#x21BB;  Reorder</button>
                 </div>
             </div>
             <ul id="list-of-addresses">
+                <li>
+                    <div>Auto Play on Connect</div>
+                    <div>Name</div>
+                    <div>Mac Address</div>
+                    <div>Connect Now</div>
+                    <div>Delete Device</div>
+                </li>
                 {% for address in addresses %}
-                {% if address.default %}
+                {% if address.auto_play %}
                 <li class="checked">
                 {% else %}
                 <li>
                 {% endif %}
-                    <input type="checkbox" name="default" value="{{ address.default }}" onclick="setDefault(this)" {% if address.default %}"checked" {% endif %}> 
+                    <div class="check-mark {{ 'checked' if address.auto_play else '' }}" onclick="setAutoPlay(this)"></div>
+                    <input type="checkbox" name="auto_play" value="{{ address.auto_play }}" onclick="setAutoPlay(this)" {{ "checked" if address.auto_play else '' }}> 
                     <input type="hidden" name="address_id" value="{{ loop.index }}">
                     <div class="input-field">
                         <label onclick="editElement(this)" for="btName{{ loop.index }}">{{ address.name }}</label>
@@ -43,7 +52,10 @@
                     <div class="input-field">
                         <label onclick="editElement(this)" for="btMacAddr{{ loop.index }}">{{ address.mac_addr }}</label>
                         <input id="btMacAddr{{ loop.index }}" type="text" onclick="editElement(this)" name="mac_addr"
-                            value="{{ address.mac_addr }}" style="display: none;">
+                        value="{{ address.mac_addr }}" style="display: none;">
+                    </div>
+                    <div class="input-field">
+                        <button class="button" onclick="setConnect(this)">Connect</button>
                     </div>
                     <div>
                         <!-- <button type="submit">Update</button> -->
@@ -56,35 +68,6 @@
     </section>
 </body>
 <script>
-    // Create a "close" button and append it to each list item
-    var myNodelist = document.getElementsByTagName("LI");
-    var i;
-    for (i = 0; i < myNodelist.length; i++) {
-        var span = document.createElement("SPAN");
-        var txt = document.createTextNode("\u00D7");
-        span.className = "close";
-        span.appendChild(txt);
-        myNodelist[i].appendChild(span);
-    }
-
-    // Click on a close button to hide the current list item
-    var close = document.getElementsByClassName("close");
-    var i;
-    for (i = 0; i < close.length; i++) {
-        close[i].onclick = function () {
-            var div = this.parentElement;
-            div.attribute.onclick = deleteElement(this);
-            div.style.display = "none";
-        }
-    }
-
-    // Add a "checked" symbol when clicking on a list item
-    var list = document.querySelector('li input[type="checkbox"]');
-    list.addEventListener('click', function (ev) {
-        if (ev.target.tagName === 'LI') {
-            ev.target.classList.toggle('checked');
-        }
-    }, false);
 
     function isValidMacAddress(macAddrInput) {
         var macAddrRegex = /^[0-9A-Fa-f]{1,2}([\.:-])(?:[0-9A-Fa-f]{1,2}\1){4}[0-9A-Fa-f]{1,2}$/;
@@ -98,7 +81,6 @@
 
     // Create a new list item when clicking on the "Add" button
     function newElement() {
-
         var inputValue = document.getElementById("nameInput").value;
         var macAddrInput = document.getElementById("macAddrInput").value;
         
@@ -116,7 +98,7 @@
                 address_id: null,
                 name: inputValue,
                 mac_addr: macAddrInput,
-                default: false
+                auto_play: false
             };
             $.ajax({
                 type: "POST",
@@ -136,17 +118,157 @@
 
     }
 
-    // // Rename a list item when clicking on the "Rename" button
-    // function renameElement(element) {
-    //     var span = element.previousElementSibling;
-    //     var inputValue = prompt("Enter the new name:");
-    //     if (inputValue !== null && inputValue !== '') {
-    //         span.textContent = inputValue;
+    function handleDragStart(event) {
+                event.dataTransfer.setData("text/plain", event.target.id);
+            }
 
-    //     } else {
-    //         alert("Please select an item to rename.");
-    //     }
-    // }
+    function handleDragOver(event) {
+        event.preventDefault();
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        var data = event.dataTransfer.getData("text/plain");
+        var draggedElement = document.getElementById(data);
+        var dropzone = event.target.closest("ul");
+        dropzone.appendChild(draggedElement);
+    }
+
+    // reorder the list items after the reorder button is clicked
+    // when reorder mode is enabled, all button in 'li' elements should be disabled
+    // input checkboxes should turn to the icons that look similar to hamburger menu
+    // when reorder mode is enabled, the reorder button should turn to a done button
+    // after the done button is clicked, reorder mode should be disabled
+    // when reorder mode is disabled, all button in 'li' elements should be enabled
+    // input checkboxes should turn back to checkboxes
+    // get all li items and then send it in ajax request to update all items order at once
+        function reorderElements() {
+        var reorderButton = document.querySelector('.reorder');
+        var reorderMode = reorderButton.classList.contains('reorder-mode');
+        if (reorderMode) {
+            reorderButton.classList.remove('reorder-mode');
+            reorderButton.innerHTML = "&#x21BB;  Reorder";
+            var liElements = document.querySelectorAll('li');
+            var data = [];
+            for (var i = 0; i < liElements.length; i++) {
+                // skip the first li element because it is the header
+                if (i === 0) {
+                    continue;
+                }
+                var li = liElements[i];
+                li.querySelector('i[class="reorder-icon"]').remove();
+                var checkbox = li.querySelector('input[name="auto_play"]');
+                var checkMark = li.querySelector('.check-mark');
+                checkbox.style.display.remove()
+                checkMark.style.display.remove();
+                if (checkbox.checked) {
+                    checkMark.classList.add('checked');
+                } else {
+                    checkMark.classList.remove('checked');
+                }
+                var addressIdInput = li.querySelector('input[name="address_id"]');
+                var addressId = addressIdInput.value ? Number(addressIdInput.value) : null;
+                data.push({
+                    address_id: addressId,
+                    order: i
+                });
+            }
+            $.ajax({
+                type: "POST",
+                url: "/reorder",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(data),
+                success: function (response) {
+                    console.log(response);
+                    },
+                error: function (error) {
+                    console.log(error);
+                    }
+            });
+            location.reload(true);
+        } else {
+            reorderButton.classList.add('reorder-mode');
+            reorderButton.innerHTML = "&#x2715;  Done";
+            // add  all the checkboxes to the reorder icon
+            var liElements = document.querySelectorAll('li');
+            for (var i = 0; i < liElements.length; i++) {
+                // skip the first li element because it is the header
+                if (i === 0) {
+                    continue;
+                }
+                var li = liElements[i];
+                var checkbox = li.querySelector('input[name="auto_play"]');
+                var checkMark = li.querySelector('.check-mark');
+                checkbox.style.display = "none";
+                checkMark.style.display = "none";
+                // add the reorder icon b
+                var reorderIcon = document.createElement("i");
+                reorderIcon.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">
+                    <path d="M0 0h24v24H0z" fill="none"/><path d="M3 15h18v-2H3v2zm0 4h18v-2H3v2zm0-8h18V9H3v2zm0-6v2h18V5H3z"/>
+                </svg>
+                `;
+                reorderIcon.name = "reorder-icon";
+                reorderIcon.classList.add('reorder-icon');
+                // add reorder icon to checkMark before the input checkbox
+                checkMark.parentElement.insertBefore(reorderIcon, checkMark);
+                
+            }
+            // make the list items draggable and update the 'address' input value
+            var liElements = document.querySelectorAll('li');
+            for (var i = 0; i < liElements.length; i++) {
+                // skip the first li element because it is the header
+                if (i === 0) {
+                    continue;
+                }
+                var li = liElements[i];
+                var addressIdInput = li.querySelector('input[name="address_id"]');
+                var addressId = Number(addressIdInput.value);
+                li.draggable = true;
+                li.ondragstart = function (event) {
+                    console.log("drag start = ")
+                    console.log(event.target.id)
+                    event.dataTransfer.setData("text/plain", event.target.id);
+                };
+                li.ondragover = function (event) {
+                    event.preventDefault();
+                };
+                li.ondrop = function (event) {
+                    event.preventDefault();
+                    console.log("drop = ")
+                    console.log(event.target.id)
+                    var data = event.dataTransfer.getData("text/plain");
+                    var element = document.getElementById(data);
+                    var target = event.target;
+                    while (target.tagName !== "LI") {
+                        target = target.parentElement;
+                    }
+                    var targetAddressIdInput = target.querySelector('input[name="address_id"]');
+                    var targetAddressId = targetAddressIdInput.value ? Number(targetAddressIdInput.value) : null;
+                    var elementAddressIdInput = element.querySelector('input[name="address_id"]');
+                    var elementAddressId = Number(elementAddressIdInput.value);
+                    targetAddressIdInput.value = elementAddressId;
+                    elementAddressIdInput.value = targetAddressId;
+                    target.parentElement.insertBefore(element, target);
+                };
+            }
+        }
+    }
+
+
+    // $.ajax({
+    //     type: "POST",
+    //     url: "/update_order",
+    //     contentType: "application/json; charset=utf-8",
+    //     data: JSON.stringify(data),
+    //     success: function (response) {
+    //         console.log(response);
+    //         },
+    //     error: function (error) {
+    //         console.log(error);
+    //         }
+    // });
+    // location.reload(true);
 
     // Edit a list item when clicking on it
     function editElement(element) {
@@ -165,7 +287,7 @@
         checkIcon.onclick = function () {
             var newValue = input.value;
             if (newValue !== '') {
-                defaultDevice = false;
+                autoPlay = false;
                 var nameInput = null;
                 var macAddrInput = null;
                 span.textContent = newValue;
@@ -181,10 +303,10 @@
                     if (!isValidMacAddr) {
                         return;
                     }
-                } else if (input.name === "default") {
-                    var update_action = "/update_default";
-                    defaultDevice = true;
-                    alert("default has ran")
+                } else if (input.name === "auto_play") {
+                    var update_action = "/update_auto_play";
+                    autoPlay = true;
+                    alert("auto_play has ran")
                 } else {
                     alert("Something went wrong.");
                 }
@@ -192,7 +314,7 @@
                     address_id: addressId,
                     name: nameInput,
                     mac_addr: macAddrInput,
-                    default: defaultDevice
+                    auto_play: autoPlay
                 };
                 $.ajax({
                     type: "POST",
@@ -225,20 +347,27 @@
         element.parentElement.appendChild(cancelIcon);
     }
 
-    // TODO add a "default" button to set the default device
-    // only one default should exist for all 'li' elements
-    // apply the checked class to the default 
-    function setDefault(element) {
+    // TODO add a "auto_play" button to set the auto_play device
+    // only one auto_play should exist for all 'li' elements
+    // apply the checked class to the auto_play 
+    function setAutoPlay(element) {
         var li = element.closest('li');
+        var autoPlayInput = li.querySelector('input[name="auto_play"]');
+        if (li.classList.contains('checked')) {
+            var autoPlay = false;
+        } else {
+            var autoPlay = true;
+
+        }
         var addressIdInput = li.querySelector('input[name="address_id"]');
         var addressId = Number(addressIdInput.value);
         var data = {
             address_id: addressId,
-            default: true
+            auto_play: autoPlay
         };
         $.ajax({
             type: "POST",
-            url: "/update_default",
+            url: "/update_auto_play",
             contentType: "application/json; charset=utf-8",
             data: JSON.stringify(data),
             success: function (response) {
@@ -249,13 +378,9 @@
             }
         });
 
-        // Clear all other 'checked' li items
-        var checkedItems = document.querySelectorAll('li.checked');
-        checkedItems.forEach(function (item) {
-            item.classList.remove('checked');
-        });
+        li.classList.toggle('checked');
+        element.classList.toggle('checked');
 
-        li.classList.add('checked');
         location.reload(true);
     }
 

@@ -65,7 +65,7 @@ def handle_request(action_type):
 			'index': index,
 			'name': data.get('name'),
 			'mac_addr': data.get('mac_addr'),
-			'default': data.get('default')
+			'auto_play': data.get('auto_play')
 		}
 	}
 	# Publish a message to the topic

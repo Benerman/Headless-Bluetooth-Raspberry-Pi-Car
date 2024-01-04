@@ -27,14 +27,14 @@
                     <button class="reorder button" onclick="reorderElements()"> &#x21BB;  Reorder</button>
                 </div>
             </div>
+            <div class="list-header">
+                <div>Auto Play on Connect</div>
+                <div>Name</div>
+                <div>Mac Address</div>
+                <div>Connect Now</div>
+                <div>Delete Device</div>
+            </div>
             <ul id="list-of-addresses">
-                <li>
-                    <div>Auto Play on Connect</div>
-                    <div>Name</div>
-                    <div>Mac Address</div>
-                    <div>Connect Now</div>
-                    <div>Delete Device</div>
-                </li>
                 {% for address in addresses %}
                 {% if address.auto_play %}
                 <li class="checked">
@@ -78,6 +78,7 @@
             return false;
         }
     }
+
 
     // Create a new list item when clicking on the "Add" button
     function newElement() {
@@ -142,7 +143,7 @@
     // when reorder mode is disabled, all button in 'li' elements should be enabled
     // input checkboxes should turn back to checkboxes
     // get all li items and then send it in ajax request to update all items order at once
-        function reorderElements() {
+    function reorderElements() {
         var reorderButton = document.querySelector('.reorder');
         var reorderMode = reorderButton.classList.contains('reorder-mode');
         if (reorderMode) {
@@ -151,10 +152,6 @@
             var liElements = document.querySelectorAll('li');
             var data = [];
             for (var i = 0; i < liElements.length; i++) {
-                // skip the first li element because it is the header
-                if (i === 0) {
-                    continue;
-                }
                 var li = liElements[i];
                 li.querySelector('i[class="reorder-icon"]').remove();
                 var checkbox = li.querySelector('input[name="auto_play"]');
@@ -192,10 +189,6 @@
             // add  all the checkboxes to the reorder icon
             var liElements = document.querySelectorAll('li');
             for (var i = 0; i < liElements.length; i++) {
-                // skip the first li element because it is the header
-                if (i === 0) {
-                    continue;
-                }
                 var li = liElements[i];
                 var checkbox = li.querySelector('input[name="auto_play"]');
                 var checkMark = li.querySelector('.check-mark');

@@ -15,7 +15,7 @@ ul {
 }
 
 /* Style the list items */
-ul li {
+ul li, .list-header {
   padding: 12px 50px;
   background: #E8DDB5;
   font-size: 18px;

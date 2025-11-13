@@ -1,0 +1,17 @@
+[Unit]
+Description=Headless Bluetooth Monitor (on.py)
+After=bluetooth.target network.target
+Requires=bluetooth.target
+
+[Service]
+WorkingDirectory=/home/username/WorkingFiles/Coding/Headless-Bluetooth-Raspberry-Pi-Car
+ExecStart=/usr/bin/env python3 /home/username/WorkingFiles/Coding/Headless-Bluetooth-Raspberry-Pi-Car/on.py
+Restart=always
+RestartSec=5
+KillMode=process
+TimeoutStartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

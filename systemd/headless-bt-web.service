@@ -1,0 +1,18 @@
+[Unit]
+Description=Headless Bluetooth Web UI (web.py)
+After=network.target bluetooth.target
+Wants=network.target
+
+[Service]
+WorkingDirectory=/home/username/WorkingFiles/Coding/Headless-Bluetooth-Raspberry-Pi-Car
+ExecStart=/usr/bin/env python3 /home/username/WorkingFiles/Coding/Headless-Bluetooth-Raspberry-Pi-Car/web.py
+Restart=always
+RestartSec=5
+KillMode=process
+TimeoutStartSec=30
+Environment=PATH=/usr/bin:/usr/local/bin
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
